@@ -1,86 +1,122 @@
 ---
 title: "A3: SPL Library Checkouts"
 output: html_document
+date: "2023-03-03"
 ---
+
+### Link: https://data.seattle.gov/Community/Checkouts-by-Title/tmmm-ytt6
+
 
 ### Introduction
 
-An introduction of the data and a description of the trends/books/items you are choosing to analyze (and why!)
+In this project, multiple library checkout trends will be graphed, analyzed, and discussed. Genres, series, and physical format checkout trends can all be utilized in different ways to reflect broader trends and events in society. First, this porject looks at the fluctuation of electronic library checkouts such as ebooks and audiobooks. Next is the popularity of romance and mystery genres. The final graph displays the popularity of the series Harry Potter.
 
 ### Summary Information
 
-Write a summary paragraph of findings that includes the 5 values calculated from your summary information R script
-
-These will likely be calculated using your DPLYR skills, answering questions such as:
-
-- What is the average number of checkouts for each item?
-- What is the month or year with the most/least checkouts for a book that you're interested in?
-- What is the month or year with the most/least checkouts for ebooks?
-- How has the number of print book checkouts changed over time?
-
-Feel free to calculate and report values that you find relevant.
+Within the first graph, which displays the popularity of romance and mystery library checkouts throughout the years, shows many interesting spikes in popularity. Romance and mystery both seem to spike slightly around the year 2015, and have a very large spike around the year 2022. In the second graph that shows the popularity of ebooks and audiobooks, there is a slight delay in ebook's popularity in comparison to audiobooks. Both forms of media are on a steady increase throughout the entire timeline. Audiobooks seem to spike in popularity around the year 2020, with ebooks following suit in 2022. In the third graph which shows the popularity of the Harry Potter series, there is a significant spike in popularity in the year 2020.
 
 ### The Dataset
 
-- Who collected/published the data?  
-- What are the parameters of the data (dates, number of checkouts, kinds of books, etc.)?
-- How was the data collected or generated?  
-- Why was the data collected?  
-- What, if any, ethical questions do you need to consider when working with this data?  
-- What are possible limitations or problems with this data?   (at least 200 words)
+This data was collected and published by Seattle Public Libraries. Parameters include whether the item is physical or digital, the type of material used, the year and month of the checkout, the number of checkouts, the title, the creator, the subjects, the publisher, and the publication year. The checkout data between 2005 and 2017 were collected from an artwork titled "Making the Invisible Visible", an artwork that recorded anonymous checkout information from all Library locations in Seattle. After 2017, the checkout information was collected by Seattle Public Libraries as the checkouts happened. The data was initially collected for the artwork, and was later collected to be realeased to the public. One ethical question to consider would be about the validity of the publication details of the library items.
 
+Some possible limitations with this data is that they cannot wholly reflect the media trends and popularity for a multitude of reasons. First of all, there are certain demographics that are more likely to check out materials from the library rather than purchase them, which could lead to skewed results. It is possible, for example, that the elderly and children may be more likely to visit the library compared to teens and adults. The trends could also possibly reflect trends relatively well among lower-income households, but not reflect trends among upper-income households as accurately. Second, there may be some media forms that people are more inclined to purchase, and some media forms that people are more inclined to borrow. Third, the data is only from public libraries within the city of Seattle, and the trends may differ significantly based on location. One problem that may occur when collecting and sorting data could be that the Subjects category is highly diverse, and extremely specific. There is no broader “genre” column with a specific set of possible genres. Because of this, sorting checkouts by the item’s content may prove difficult. There is a similar issue with the Author category, because there are many ways to format the exact same author’s name. Because of this, it may be difficult to plot an author’s popularity without accidentally excluding some of their works.
 
 ### First Trends Over Time Chart
 
-Include a chart. Make sure to describe why you included the chart, and what patterns emerged
+This chart shows the trends of the genres romance and mystery since the year 2005. Overall, romance is checked out much more often up until around the year 2021, where mystery takes a lead. One possible explanation for this could be because of the Covid-19 pandemic, where genres such as suspense, mystery, sci-fi, and crime boosted in popularity. It could reflect the feeling of unrest and uncertainty that many people were feeling. Both mystery and romance reach their peak around 2022.
 
-The first chart that you will create and include will show the trend over time of your variable/topic/interest. Think carefully about what you want to communicate to your user (you may have to find relevant trends in the dataset first!). Here are some requirements to help guide your design:
+``````{r, echo = FALSE, warning = FALSE, code = readLines("chart3.R")}
+library("tidyverse")
+library("dplyr")
+library("stringr")
+library("ggplot2")
 
-- Show more than one, but fewer than ~10 trends
-  - For example, two books, or 5 different mediums
-- You must have clear x and y axis labels
-- The chart needs a clear title 
-- You need a legend for your different line colors and a clear - legend title
-In your .Rmd file, make sure to describe why you included the chart, and what patterns emerged
+checkout_data2 <- read.csv("/Users/junem/Downloads/romance_mystery.csv")
 
-When we say "clear" or "human readable" titles and labels, that means that you should not just display the variable name.
+total_romance_checkouts <- checkout_data2 %>%
+  filter(grepl('Romance', Subjects)) %>%
+  group_by(CheckoutYear) %>%
+  summarise(total_romance = sum(Checkouts) / 1000000)
 
-Here's an example of how to run an R script inside an RMarkdown file:
+total_mystery_checkouts <- checkout_data2 %>%
+  filter(grepl('Mystery', Subjects)) %>%
+  group_by(CheckoutYear) %>%
+  summarise(total_mystery = sum(Checkouts) / 1000000)
 
-``````{r, echo = FALSE, warning = FALSE, code = readLines("chart1_example.R")}
+chart3 <- merge(total_romance_checkouts, total_mystery_checkouts, by = "CheckoutYear")
+
+legend_title <- "Genres"
+
+ggplot(chart3, aes(x = CheckoutYear)) +
+  geom_line(aes(y = total_romance, color = "#AB648D")) +
+  geom_line(aes(y = total_mystery, color = "#8664AB")) +
+  labs(x = "Year", 
+       y = "Checkouts (in Millions)", 
+       title = "Romance and Mystery Checkout Trends over Time") +
+  scale_color_manual(legend_title, labels = c("Romance", "Mystery"), values = c("#AB648D", "#8664AB")) +
+  theme_minimal()
+
+
 ```
 
 ### Second Trends Over Time Chart
 
-Include a chart. Make sure to describe why you included the chart, and what patterns emerged
+This chart plots the number of checkouts of audiobooks and ebooks checked out per year. They are both on a steady increase, but audiobooks spike significantly around the year 2020. Ebooks follow suite, spiking around the year 2022. The explanation for these trends could be a combination of the Covid-19 pandemic as well as the rapid digitization that has been happening the past few years. 
 
-The second chart that you will create and include will show another trend over time of your variable/topic/interest. Think carefully about what you want to communicate to your user (you may have to find relevant trends in the dataset first!). Here are some requirements to help guide your design:
+``````{r, echo = FALSE, code = readLines("chart2.R")}
+library("tidyverse")
+library("dplyr")
+library("stringr")
+library("ggplot2")
 
-- Show more than one, but fewer than ~10 trends
-  - For example, two books, or 5 different mediums
-- You must have clear x and y axis labels
-- The chart needs a clear title 
-- You need a legend for your different line colors and a clear - legend title
-In your .Rmd file, make sure to describe why you included the chart, and what patterns emerged
+checkout_data <- read.csv("/Users/junem/Downloads/online_checkouts.csv")
 
-When we say "clear" or "human readable" titles and labels, that means that you should not just display the variable name.
+total_ebook_checkouts <- checkout_data %>%
+  filter(MaterialType == "EBOOK") %>%
+  group_by(CheckoutYear) %>%
+  summarise(total_ebook = sum(Checkouts) / 1000)
 
-Here's an example of how to run an R script inside an RMarkdown file:
+total_audiobook_checkouts <- checkout_data %>%
+  filter(MaterialType == "AUDIOBOOK") %>%
+  group_by(CheckoutYear) %>%
+  summarise(total_audiobook = sum(Checkouts) / 1000)
 
-``````{r, echo = FALSE, code = readLines("chart2_example.R")}
+chart2 <- merge(total_audiobook_checkouts, total_ebook_checkouts, by = "CheckoutYear")
+
+legend_title <- "Legend"
+
+ggplot(chart2, aes(x = CheckoutYear)) +
+  geom_line(aes(y = total_audiobook, color = "#64A0AB")) +
+  geom_line(aes(y = total_ebook, color = "#64AB8A")) +
+  labs(x = "Year", 
+       y = "Checkouts (in Thousands)", 
+       title = "Online Checkout Trends over Time") +
+  scale_color_manual(legend_title, labels = c("Audiobooks", "Ebooks"), values = c("#64A0AB", "#64AB8A")) +
+  theme_minimal()
+
+
+
+
 ```
 
 ### Your Choice
 
-The last chart is up to you. It could be a line plot, scatter plot, histogram, bar plot, stacked bar plot, and more. Here are some requirements to help guide your design:
+The last chart is a bar chart that shows the number of checkouts of Harry Potter books throughout the years. The number of checkouts spikes significantly in the year 2020, with very high numbers of checkouts throughout the years 2016 and 2022. There could be a few reasons for this significant increase in popularity so long after the release. One potential reason could be that many people went back to read the books during the Covid-19 pandemic in search for nostalgia. Another possibility could be the announcement of the release of the Harry Potter Legacy video game, which happened some time around 2019. Perhaps many Harry Potter fans wanted to reread the series before playing the video game. 
 
-- You must have clear x and y axis labels
-- The chart needs a clear title 
-- You need a legend for your different line colors and a clear legend title
+``````{r, echo = FALSE, code = readLines("chart1.R")}
+library("tidyverse")
+library("dplyr")
+library("stringr")
+library("ggplot2")
 
-Here's an example of how to run an R script inside an RMarkdown file:
 
-``````{r, echo = FALSE, code = readLines("chart2_example.R")}
+harry_potter_data <- read.csv("/Users/junem/Downloads/Potter_Checkouts.csv")
+
+ggplot(harry_potter_data, aes(x = CheckoutYear, y = Checkouts, fill = CheckoutYear)) +
+  geom_col() +
+  labs(x = "Year", y = "Checkouts", title = "Harry Potter Checkouts Throughout the Years") +
+  theme_minimal()
+  
 ```
 
 
